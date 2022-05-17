@@ -16,7 +16,9 @@ according to the sequence they enter the matching engine.
 The matching engine will accept a stream of market data to simulate the market order book. Each update will be a 5-level
 snapshot as shown below:
 
-![img.png](img.png)
+ --       Bid5 Bid4 Bid3 Bid2 Bid1 Ask1 Ask2 Ask3 Ask4 Ask5
+Price     99.6 99.7 99.8 99.9 100 100.1 100.2 100.3 100.4 100.5
+Quantity  500 400 300 300 100 500 1000 2000 2500 3000
 
 **Implementation**
 
