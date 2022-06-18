@@ -3,5 +3,5 @@ public interface OrderBook {
 
     boolean cancel(int id);
 
-    boolean InsertOrder(Order order);
+    boolean fillAndInsert(Order order);
 }

@@ -1,29 +1,52 @@
 import java.util.Objects;
 
-public class Order {
+class Order {
     private int id;
     private double price;
     private int quantity;
-    private boolean buy;
+    private boolean buySide;
 
-    public Order(int id, double price, int quantity, boolean buy) {
+    public Order(int id, double price, int quantity, boolean buySide) {
+        validate(id, quantity, price);
         this.id = id;
         this.price = price;
         this.quantity = quantity;
-        this.buy = buy;
+        this.buySide = buySide;
     }
 
-    public int getId() {return id;}
+    private void validate(int id, int quantity, double price) {
+        if (quantity <= 0)
+            throw new IllegalArgumentException("Qty cannot be less than or equal to zero");
 
-    public double getPrice() {return price;}
+        if (price <= 0 || id <= 0)
+            throw new IllegalArgumentException("Price and id cannot be less than 0." +
+                    "\n" + " Zero price represents a Market Order" +
+                    "\n" + " Zero id represents orders from other participants");
+    }
 
-    public int getQuantity() {return quantity;}
+    public int getId() {
+        return id;
+    }
 
-    public boolean isBuy() {return buy;}
+    public double getPrice() {
+        return price;
+    }
 
-    public void setPrice(double price) {this.price = price;}
+    public int getQuantity() {
+        return quantity;
+    }
 
-    public void setQuantity(int quantity) {this.quantity = quantity;}
+    public boolean isBuySide() {
+        return buySide;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -33,12 +56,12 @@ public class Order {
         return getId() == order.getId() &&
                 Double.compare(order.getPrice(), getPrice()) == 0 &&
                 getQuantity() == order.getQuantity() &&
-                isBuy() == order.isBuy();
+                isBuySide() == order.isBuySide();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getPrice(), getQuantity(), isBuy());
+        return Objects.hash(getId(), getPrice(), getQuantity(), isBuySide());
     }
 
     @Override
@@ -47,7 +70,7 @@ public class Order {
                 "id=" + id +
                 ", price=" + price +
                 ", quantity=" + quantity +
-                ", sideTrade=" + buy +
+                ", sideTrade=" + buySide +
                 '}';
     }
 }
