@@ -118,7 +118,7 @@ class OrderQueue {
         }
 
         if (!result && !partialFill){
-            System.out.println("Order " + order " did not get any fills");
+            System.out.println("Order " + order + " did not get any fills");
         }
 
         return result;
