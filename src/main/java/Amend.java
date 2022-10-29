@@ -24,7 +24,7 @@ class Amend {
             this.price = price;
             this.quantity = -1;
         } else
-            throw new IllegalArgumentException("Price and ID cannot be <= 0; AmendType for price should be PRICE_AMEND");
+            throw new IllegalArgumentException("Price or id cannot be <=0; Amendtype for price should be price_amend")
     }
 
     public int getId() {
@@ -39,6 +39,8 @@ class Amend {
         return quantity;
     }
 
-    public double getPrice() { return price; }
+    public double getPrice() {
+        return price;
+    }
 
 }

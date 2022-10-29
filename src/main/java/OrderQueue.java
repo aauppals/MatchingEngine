@@ -19,14 +19,14 @@ class OrderQueue {
         if (!result) {
             insert(order, lookBook);
             if (buySide)
-                maxPrices.add(order.getPrice());
+                maxPrices.add(order.getPrice()); //order not filled; price added to same side to update prices in order book
             else
                 minPrices.add(order.getPrice());
         }
     }
 
     boolean amendQuantity(Amend amend, Order order, Map<Integer, Order> lookBook) {
-        Iterator<Order> itr = getQueueSide(order.isBuySide()).iterator();
+        Iterator<Order> itr = getQueueSide(order.isBuySide()).iterator(); //iterator on queue
         while (itr.hasNext()) {
             Order restingOrder = itr.next();
             if (restingOrder.getId() == amend.getId()) {
@@ -65,7 +65,63 @@ class OrderQueue {
 
 
     private boolean fill(Order order, Map<Integer, Order> lookBook, PriorityQueue<Double> priorityQueue) {
-        return false;
+        boolean result = false;
+        boolean partialFill = false;
+
+        Iterator<Order> itr = getQueueSide(!order.isBuySide()).iterator();//return iterator on queue for opposite side
+        while (itr.hasNext()) {
+            Order restingOrder = itr.next();
+            int restingId = restingOrder.getId();
+            int orderQty = order.getQuantity();
+            int restingQty = restingOrder.getQuantity();
+            int diff = orderQty - restingQty;
+
+            if (diff < 0) { // order is filled completely
+                order.setQuantity(0);
+                int newQuantity = diff * -1;
+                restingOrder.setQuantity(newQuantity);
+
+                if (!UnifiedOrderBook.isMarketUpdate(restingId)) {
+                    lookBook.get(restingId).setQuantity(newQuantity);
+                }
+                result = true;
+
+                System.out.println("Order: " + order + " is fully filled.");
+                System.out.println("Resting Order: " + restingOrder + " is partially filled. Quantity left is: " + restingOrder.getQuantity());
+                break;
+            } else if (diff > 0) { //order will be partially filled
+                order.setQuantity(diff);
+                System.out.println("Resting Order: " + restingOrder + " is fully filled.");
+                System.out.println("Order: " + order + " is partially filled. Quantity left is: " + order.getQuantity());
+
+                priorityQueue.remove(restingOrder.getPrice()); //remove price from queue
+                itr.remove();//remove underlying Order from queue
+
+                if (!UnifiedOrderBook.isMarketUpdate(restingId)) {
+                    lookBook.remove(restingId);
+                }
+                partialFill = true;
+
+            } else { //order qty is exactly same as resting order qty
+                order.setQuantity(0);
+                System.out.println("Both resting order: " + restingOrder + " and Order " + order + " are fully filled.");
+
+                priorityQueue.remove(restingOrder.getPrice());
+                itr.remove();
+
+                if (!UnifiedOrderBook.isMarketUpdate(restingId))
+                    lookBook.remove(restingId);
+
+                result = true;
+                break;
+            }
+        }
+
+        if (!result && !partialFill){
+            System.out.println("Order " + order " did not get any fills");
+        }
+
+        return result;
     }
 
 }

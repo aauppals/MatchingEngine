@@ -16,9 +16,8 @@ according to the sequence they enter the matching engine.
 The matching engine will accept a stream of market data to simulate the market order book. Each update will be a 5-level
 snapshot as shown below:
 
- --       Bid5 Bid4 Bid3 Bid2 Bid1 Ask1 Ask2 Ask3 Ask4 Ask5
-Price     99.6 99.7 99.8 99.9 100 100.1 100.2 100.3 100.4 100.5
-Quantity  500 400 300 300 100 500 1000 2000 2500 3000
+-- Bid5 Bid4 Bid3 Bid2 Bid1 Ask1 Ask2 Ask3 Ask4 Ask5 Price 99.6 99.7 99.8 99.9 100 100.1 100.2 100.3 100.4 100.5
+Quantity 500 400 300 300 100 500 1000 2000 2500 3000
 
 **Implementation**
 
@@ -29,13 +28,24 @@ This is a single stock matching engine, implementing price/time priority matchin
 ### Classes:
 
 - Order:
-  Represents an order object. Has properties : id, price, quantity, buy or sell
+  Represents an order object. Has properties : id, price, quantity, buy or sell 
+- Setters : Price and quantity only
 
 - Amend:
-  Represents order amend; 2 amends supported: Price & Quantity. Has properties order id, amendType, price (for price
+  Represents order amend; 2 amends supported: Price & Quantity. Has properties order id, amendTypes: price (for price
   amend), quantity (for quantity amend)
 
 - OrderBook (interface):
   Contract of methods providing basic functionality for an order book: InsertOrder; Amend order; Cancel order
 
--
+- OrderQueue:
+  Represents the buy and sell order queue at a certain price level.
+
+-lookbook:
+ Is maintained to check if an order with a certain id exists, which is used to verify:
+ i) Validity of amends and cancellations received
+ ii) Uniqueness of order ID's
+ 
+ The lookbook does not keep track of orders in market updates
+
+
