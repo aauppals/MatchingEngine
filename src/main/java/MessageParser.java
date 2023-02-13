@@ -1,5 +1,6 @@
 import com.google.common.collect.ImmutableSortedSet;
 
+import java.util.List;
 import java.util.SortedSet;
 
 public class MessageParser {
@@ -12,6 +13,8 @@ public class MessageParser {
     private final char BUY = '0';
     private final char SELL = '1';
     private final int MESSAGE_INDEX = 2;
+    private final int MARKET_BOOK_SIZE = 5;
+
 
     private final SortedSet<String> PREFIXES;
 
@@ -32,7 +35,7 @@ public class MessageParser {
     }
 
     Order newOrder(String message) {
-        if (!message.matches("^N:\\d+,\\d+(\\.\\d+)?,\\d+,[0|1]]$")) {
+        if (!message.matches("^N:\\d+,\\d+(\\.\\d+)?,\\d+,[0|1]$")) {
             throw new RuntimeException("Illegal message for New Order");
         }
 
@@ -44,6 +47,11 @@ public class MessageParser {
                 sideBuy(orderParams[3]));
     }
 
+    int cancelId(String message) {
+        if (!message.matches("^X:\\d+$"))
+            throw new RuntimeException("Illegal message for cancel order");
+        return Integer.parseInt(message.split(String.valueOf(COLON))[1]);
+    }
      /*
         Note: ^,$ are position anchors for regex matching, for start and end respectively.
         It means the whole string will be matched, and not a substring
@@ -52,10 +60,42 @@ public class MessageParser {
         ? is optional matching (0 or 1 times)
      */
 
+    Amend makeAmend(String message) {
+        if (!message.matches("^A:\\d+,[0|1],\\d+(\\.\\d+)?$"))
+            throw new RuntimeException("Illegal message for amend order");
+
+        String[] orderParams = message.substring(MESSAGE_INDEX).split(",");
+        int amendType = Integer.parseInt(orderParams[1]);
+
+        if (amendType == Amend.PRICE_AMEND) {
+            return new Amend(Integer.parseInt(orderParams[0]), amendType, Double.parseDouble(orderParams[2]));
+        } else if (amendType == Amend.QTY_AMEND) {
+            return new Amend(Integer.parseInt(orderParams[0]), amendType, Integer.parseInt(orderParams[2]));
+        } else throw new IllegalArgumentException("Amend type is not known.");
+    }
+
+
+    List<Order> marketUpdates(String message) {
+        if (!message.matches("^M:(\\d+(\\.\\d+)?,\\d+\\|){10}")) {
+            throw new RuntimeException("Ill formed message for market update");
+        }
+
+        String[] orderStr = message.substring(MESSAGE_INDEX).split("\\|");
+        int expectedUpdateSize = 2 * MARKET_BOOK_SIZE;
+        int marketOrderSize = orderStr.length;
+
+        if (marketOrderSize != expectedUpdateSize) {
+            throw new RuntimeException("Expected market update size: " + expectedUpdateSize + " but received: " + marketOrderSize);
+        }
+
+        int bidIndex = MARKET_BOOK_SIZE - 1;
+
+        return null;
+    }
+
     private boolean sideBuy(String input) {
         if (input.length() != 1)
             throw new IllegalArgumentException("Order side should be 1 character only");
-
         if (input.charAt(0) == BUY)
             return true;
         else if (input.charAt(0) == SELL)

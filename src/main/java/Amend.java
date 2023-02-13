@@ -4,8 +4,8 @@ class Amend {
     private final int quantity;
     private final double price;
 
-    private final int QTY_AMEND = 0;
-    private final int PRICE_AMEND = 1;
+    static final int QTY_AMEND = 0;
+    static final int PRICE_AMEND = 1;
 
     Amend(int id, int amendType, int quantity) {
         if (id >= 0 && quantity >= 0 && amendType == QTY_AMEND) {
