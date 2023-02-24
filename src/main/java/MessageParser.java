@@ -1,5 +1,6 @@
 import com.google.common.collect.ImmutableSortedSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -13,7 +14,7 @@ public class MessageParser {
     private final char BUY = '0';
     private final char SELL = '1';
     private final int MESSAGE_INDEX = 2;
-    private final int MARKET_BOOK_SIZE = 5;
+    private final int MARKET_BOOK_DEPTH = 5;
 
 
     private final SortedSet<String> PREFIXES;
@@ -76,21 +77,34 @@ public class MessageParser {
 
 
     List<Order> marketUpdates(String message) {
+        //ToDo: Write tests for market updates
+
         if (!message.matches("^M:(\\d+(\\.\\d+)?,\\d+\\|){10}")) {
             throw new RuntimeException("Ill formed message for market update");
         }
 
         String[] orderStr = message.substring(MESSAGE_INDEX).split("\\|");
-        int expectedUpdateSize = 2 * MARKET_BOOK_SIZE;
+        int expectedUpdateSize = 2 * MARKET_BOOK_DEPTH;
         int marketOrderSize = orderStr.length;
 
         if (marketOrderSize != expectedUpdateSize) {
             throw new RuntimeException("Expected market update size: " + expectedUpdateSize + " but received: " + marketOrderSize);
         }
 
-        int bidIndex = MARKET_BOOK_SIZE - 1;
+        int bidIndex = MARKET_BOOK_DEPTH - 1;
+        List<Order> orders = new ArrayList<>();
 
-        return null;
+        int i = bidIndex;
+        int j = MARKET_BOOK_DEPTH;
+        while (i >= 0 && (j <= (MARKET_BOOK_DEPTH * 2) - 1)) {
+            String[] properties = orderStr[i].split(",");
+            orders.add(new Order(0, Double.parseDouble(properties[0]), Integer.parseInt(properties[1]), true));
+            properties = orderStr[j].split(",");
+            orders.add(new Order(0, Double.parseDouble(properties[0]), Integer.parseInt(properties[1]), false));
+            i--;
+            j++;
+        }
+        return orders;
     }
 
     private boolean sideBuy(String input) {
