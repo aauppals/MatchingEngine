@@ -77,7 +77,6 @@ public class MessageParser {
 
 
     List<Order> marketUpdates(String message) {
-        //ToDo: Write tests for market updates
 
         if (!message.matches("^M:(\\d+(\\.\\d+)?,\\d+\\|){10}")) {
             throw new RuntimeException("Ill formed message for market update");

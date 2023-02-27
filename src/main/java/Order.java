@@ -18,7 +18,7 @@ class Order {
         if (quantity <= 0)
             throw new IllegalArgumentException("Qty cannot be less than or equal to zero");
 
-        if (price <= 0 || id <= 0)
+        if (price < 0 || id < 0)
             throw new IllegalArgumentException("Price and id cannot be less than 0." +
                     "\n" + " Zero price represents a Market Order" +
                     "\n" + " Zero id represents orders from other participants");
@@ -70,7 +70,7 @@ class Order {
                 "id=" + id +
                 ", price=" + price +
                 ", quantity=" + quantity +
-                ", sideTrade=" + buySide +
+                ", buySide=" + buySide +
                 '}';
     }
 }
