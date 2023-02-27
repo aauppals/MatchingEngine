@@ -25,6 +25,16 @@ class OrderQueue {
         }
     }
 
+    private void insert(Order order, Map<Integer, Order> lookBook) {
+        getQueueSide(order.isBuySide()).add(order);
+        int id = order.getId();
+
+        if (!UnifiedOrderBook.isMarketUpdate(id)) {
+            lookBook.put(id, order);
+        }
+        System.out.printf("Order: %s inserted in the book", order);
+    }
+
     boolean amendQuantity(Amend amend, Order order, Map<Integer, Order> lookBook) {
         Iterator<Order> itr = getQueueSide(order.isBuySide()).iterator(); //iterator on queue
         while (itr.hasNext()) {
@@ -46,23 +56,6 @@ class OrderQueue {
         }
         return true;
     }
-
-
-    private void insert(Order order, Map<Integer, Order> lookBook) {
-        getQueueSide(order.isBuySide()).add(order);
-        int id = order.getId();
-
-        if (!UnifiedOrderBook.isMarketUpdate(id)) {
-            lookBook.put(id, order);
-        }
-        System.out.printf("Order: %s inserted in the book", order);
-    }
-
-    private ConcurrentLinkedQueue<Order> getQueueSide(boolean buySide) {
-        if (buySide) return buyQueue;
-        return sellQueue;
-    }
-
 
     private boolean fill(Order order, Map<Integer, Order> lookBook, PriorityQueue<Double> priorityQueue) {
         boolean result = false;
@@ -117,11 +110,31 @@ class OrderQueue {
             }
         }
 
-        if (!result && !partialFill){
+        if (!result && !partialFill) {
             System.out.println("Order " + order + " did not get any fills");
         }
-
         return result;
+    }
+
+    void remove(Order order, Map<Integer, Order> lookbook, PriorityQueue<Double> priorityQueue) {
+        Iterator<Order> itr = getQueueSide(order.isBuySide()).iterator();
+        int id = order.getId();
+        while (itr.hasNext()) {
+            Order restingOrder = itr.next();
+            double price = restingOrder.getPrice();
+            if (restingOrder.getId() == id) {
+                System.out.println(restingOrder + " cancelled.");
+                itr.remove();
+                lookbook.remove(id);
+                priorityQueue.remove(price);
+                break;
+            }
+        }
+    }
+
+    private ConcurrentLinkedQueue<Order> getQueueSide(boolean buySide) {
+        if (buySide) return buyQueue;
+        return sellQueue;
     }
 
 }
