@@ -19,7 +19,7 @@ class OrderQueue {
         if (!result) {
             insert(order, lookBook);
             if (buySide)
-                maxPrices.add(order.getPrice()); //order not filled; price added to same side to update prices in order book
+                maxPrices.add(order.getPrice()); //order not filled; price added to opposite side
             else
                 minPrices.add(order.getPrice());
         }
