@@ -70,24 +70,46 @@ class UnifiedOrderBook implements OrderBook {
         }
     }
 
-    private Order getOrder(int id) {
-        if (id == MARKET_UPDATE_ID) return null;
-        return lookBook.get(id);
-    }
-
     @Override
     public boolean amend(Amend amend) {
-        return false;
+        lock.lock();
+        try {
+            int id = amend.getId();
+            Order order = getOrder(id);
+
+            if (order == null) {
+                System.out.println("Order with id " + id + " not found, amend failed.");
+                return false;
+            }
+
+            if (amend.getAmendType() == Amend.PRICE_AMEND && amend.getPrice() != order.getPrice()) {
+                cancel(id);
+                order.setPrice(amend.getPrice());
+                return fillAndInsert(order);
+            } else if (amend.getAmendType() == Amend.QTY_AMEND && amend.getQuantity() != order.getQuantity()) {
+                return orderBook.get(order.getPrice()).amendQuantity(amend, order, lookBook);
+            }
+            return false;
+
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public boolean cancel(int id) {
+
         return false;
     }
 
     public static boolean isMarketUpdate(int id) {
         if (id == MARKET_UPDATE_ID) return true;
         else return false;
+    }
+
+    private Order getOrder(int id) {
+        if (id == MARKET_UPDATE_ID) return null;
+        return lookBook.get(id);
     }
 
 }

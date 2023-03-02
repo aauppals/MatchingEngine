@@ -41,8 +41,8 @@ class OrderQueue {
             Order restingOrder = itr.next();
             if (restingOrder.getId() == amend.getId()) {
                 if (amend.getQuantity() < restingOrder.getQuantity()) {
-                    restingOrder.setQuantity(amend.getQuantity());
-                    System.out.println(restingOrder + "quantity down-amended");
+                    System.out.println(restingOrder + "quantity down-amending from " +
+                            restingOrder.getQuantity() + " to " + amend.getQuantity());
                     lookBook.replace(restingOrder.getId(), restingOrder);
                 } else {
                     Order newOrder = new Order(order.getId(), order.getPrice(), amend.getQuantity(), order.isBuySide());
