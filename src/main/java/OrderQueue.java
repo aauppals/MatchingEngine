@@ -12,6 +12,11 @@ class OrderQueue {
         buyQueue = new ConcurrentLinkedQueue<>();
     }
 
+    int bookSize(boolean sideBuy) {
+        if (sideBuy) return buyQueue.size();
+        else return sellQueue.size();
+    }
+
     void fillAndInsert(Order order, Map<Integer, Order> lookBook, PriorityQueue<Double> minPrices, PriorityQueue<Double> maxPrices) {
         boolean result;
         boolean buySide = order.isBuySide();
@@ -137,6 +142,13 @@ class OrderQueue {
         return sellQueue;
     }
 
+    public void printBook(boolean buySide) {
+        Iterator<Order> itr = getQueueSide(buySide).iterator();
+        while (itr.hasNext()) {
+            Order order = itr.next();
+            System.out.println(order);
+        }
+    }
 }
 
 

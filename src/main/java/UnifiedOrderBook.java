@@ -98,13 +98,29 @@ class UnifiedOrderBook implements OrderBook {
 
     @Override
     public boolean cancel(int id) {
+        lock.lock();
+        if (getOrder(id) == null) return false;
 
-        return false;
-    }
+        try {
+            Order order = getOrder(id);
+            if (order == null) {
+                System.out.println("Order with id: " + id + " does not exist in lookbook, cancellation  failed.");
+                return false;
+            }
+            OrderQueue queues = orderBook.get(order.getPrice());
 
-    public static boolean isMarketUpdate(int id) {
-        if (id == MARKET_UPDATE_ID) return true;
-        else return false;
+            if (queues != null) {
+                if (order.isBuySide()) {
+                    queues.remove(order, lookBook, maxPrices);
+                } else {
+                    queues.remove(order, lookBook, minPrices);
+                }
+                return true;
+            }
+            return false;
+        } finally {
+            lock.unlock();
+        }
     }
 
     private Order getOrder(int id) {
@@ -112,4 +128,24 @@ class UnifiedOrderBook implements OrderBook {
         return lookBook.get(id);
     }
 
+    public static boolean isMarketUpdate(int id) {
+        if (id == MARKET_UPDATE_ID) return true;
+        else return false;
+    }
+
+    public Map<Integer, Order> getLookBook() {
+        return lookBook;
+    }
+
+    public Map<Double, OrderQueue> getOrderBook() {
+        return orderBook;
+    }
+
+    public PriorityQueue<Double> getMinPrices() {
+        return minPrices;
+    }
+
+    public PriorityQueue<Double> getMaxPrices() {
+        return maxPrices;
+    }
 }
