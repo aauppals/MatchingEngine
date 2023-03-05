@@ -13,6 +13,13 @@ public class TestUtil {
         assertEquals(sellBook, orderBook.getOrderBook().get(price).bookSize(false));
     }
 
+    static void assertOtherSizes(UnifiedOrderBook unifiedOrderBook, int minPrices, int maxPrices, int lookBook) {
+        assertEquals(minPrices, unifiedOrderBook.getMinPrices().size());
+        assertEquals(maxPrices, unifiedOrderBook.getMaxPrices().size());
+        assertEquals(lookBook, unifiedOrderBook.getLookBook().size());
+
+    }
+
     static void printOrderBook(UnifiedOrderBook orderBook) {
         System.out.println("***Order Book***");
         Iterator itr = orderBook.getOrderBook().entrySet().iterator();
