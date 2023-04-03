@@ -123,6 +123,16 @@ class UnifiedOrderBook implements OrderBook {
         }
     }
 
+    void clear() {
+        lock.lock();
+        try {
+            orderBook.clear();
+            lookBook.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
+
     private Order getOrder(int id) {
         if (id == MARKET_UPDATE_ID) return null;
         return lookBook.get(id);
